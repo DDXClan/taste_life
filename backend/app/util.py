@@ -17,3 +17,8 @@ async def delete(session: AsyncSession, item):
     await session.delete(item)
     await session.commit()
     return True
+
+async def create(session: AsyncSession, item):
+    session.add(item)
+    await session.commit()
+    return item

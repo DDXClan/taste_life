@@ -1,0 +1,6 @@
+
+backend/venv
+*__pycache__
+backend/migrations
+backend/alembic.ini
+docker

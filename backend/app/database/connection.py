@@ -1,11 +1,8 @@
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from redis import asyncio as aioredis
-async_engine = create_async_engine('sqlite+aiosqlite:///backend.db')
-
-"""
-    С БД Я ПОКА ЧТО ПРОСТО ИГРАЮСЬ ПОТОМ ПОМЕНЯЮ ЕЕ НА ДРУГУЮ
-"""
+import os
+async_engine = create_async_engine(f'mysql+aiomysql://{os.getenv('database_url')}')
 
 async_session = sessionmaker(async_engine, class_=AsyncSession, expire_on_commit=False)
 

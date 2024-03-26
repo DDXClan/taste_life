@@ -8,17 +8,16 @@ from schemas.user import UserScheme
 
 class AuthService:
 
-    def __init__(self, _user: User) -> None:
-        self._user = _user
+    def __init__(self) -> None:
         self._SECRET_KEY = '78804631189851e2760a0e3147f83ad4cc80fc35eef18f1c2ed86be740f42517'
         self._ALGORITHM = 'HS256'
         self._EXPIRATION_TIME = timedelta(minutes=30)
         self._EXPIRATION_TIME_REFRESH = timedelta(hours=2)
 
-
-    async def reg(self, user_data: UserScheme):
+    @staticmethod
+    async def reg(user_data: UserScheme):
         user_data.password = pbkdf2_sha256.hash(user_data.password)
-        user = await self._user.create(user_data.dict())
+        user = await User.create(user_data.dict())
         if not user:
             raise HTTPException(status_code=400)
         return {'message': 'Success'}
@@ -52,7 +51,7 @@ class AuthService:
         
 
     async def login(self, username: str, password: str):
-        user = await self._user.by_username(username)
+        user = await User.by_username(username)
         if not user or not await self.verify_password(user.password, password):
             raise HTTPException(status_code=403)
         return await self.gen_tokens(user.username)
@@ -73,7 +72,7 @@ class AuthService:
         decode_data = await self.decode_token(token)
         if not decode_data:
             raise HTTPException(status_code=401)
-        user = await self._user.by_username(decode_data['sub'])
+        user = await User.by_username(decode_data['sub'])
         if not user:
             raise HTTPException(status_code=401)
         return user

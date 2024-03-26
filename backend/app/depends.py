@@ -5,18 +5,13 @@ from service.item import ItemService
 from service.auth import AuthService
 
 
-item = Item()
-category = Category()
-
-item_service = ItemService(item, category)
+item_service = ItemService()
 
 async def get_item_service() -> ItemService:
     return item_service
 
 
-user = User()
-
-auth_service = AuthService(user)
+auth_service = AuthService()
 
 oauth2scheme = OAuth2PasswordBearer('/api/auth/login')
 

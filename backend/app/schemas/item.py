@@ -1,5 +1,5 @@
 from pydantic import BaseModel, validator
-from typing import Optional
+from typing import Optional, List
 
 class CategoryScheme(BaseModel):
     category_name: str
@@ -22,3 +22,6 @@ class ItemScheme(BaseModel):
         if price < 0:
             raise ValueError('price cannot be negative')
         return price
+    
+class OrderItem(BaseModel):
+    items_id: List[int]
