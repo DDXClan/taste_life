@@ -23,5 +23,3 @@ class ItemScheme(BaseModel):
             raise ValueError('price cannot be negative')
         return price
     
-class OrderItem(BaseModel):
-    items_id: List[int]

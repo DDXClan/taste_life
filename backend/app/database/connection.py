@@ -15,5 +15,3 @@ async def operation_session(op):
         return None
     
 redis = aioredis.from_url('redis://localhost')
-
-

@@ -19,7 +19,7 @@ class AuthService:
         user_data.password = pbkdf2_sha256.hash(user_data.password)
         user = await User.create(user_data.dict())
         if not user:
-            raise HTTPException(status_code=400)
+            raise HTTPException(status_code= 400)
         return {'message': 'Success'}
     
 

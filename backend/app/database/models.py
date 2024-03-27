@@ -1,11 +1,11 @@
-from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, select, update
+from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, select, update, func, distinct
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
 from datetime import datetime
 from database.connection import operation_session
 from util import delete, create
-# 
+
 
 Base = declarative_base()
 
@@ -68,7 +68,7 @@ class Item(Base):
     description = Column(String(255), nullable=False)
     price = Column(Integer, default=0)
     category_id = Column(ForeignKey(Category.id), nullable=False)
-    oreder_item = relationship('OrderItem', cascade=relationship_config)
+    oreder = relationship('Order', cascade=relationship_config)
 
     @staticmethod
     async def create(data: dict) -> Optional['Item']:
@@ -156,6 +156,8 @@ class User(Base):
     password = Column(String(255), nullable=False)
     user_img = Column(String(255), default='placeholder.png')
     role_id = Column(ForeignKey(Role.id), nullable=False, default=1)
+    order = relationship('Order', cascade=relationship_config)
+
 
     @staticmethod
     async def create(data: dict) -> Optional['User']:
@@ -180,57 +182,16 @@ class User(Base):
         return await operation_session(op)
 # ПОТОМ ДОПИШУ ФУНКЦИОНАЛ ПОД ЮЗЕРА СЕЙЧАС ПОКА ВАЖНЕЕ ДРУГОЕ 
     
-
-class OrderItem(Base):
-    __tablename__ = 'OrderItem'
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    item_id = Column(ForeignKey(Item.id), nullable=False)
-    quantity = Column(Integer, nullable=False, default=1)
-    user_order = relationship('UserOrder', cascade=relationship_config)
-
-
-    @staticmethod
-    async def create(data: dict) -> Optional['OrderItem']:
-        async def op(session: AsyncSession):
-            return await create(session, OrderItem(**data))
-        return await operation_session(op)
-
-
-    @staticmethod
-    async def all() -> List['OrderItem']:
-        async def op(session: AsyncSession):
-            result = await session.execute(select(OrderItem))
-            return result.scalars().all()
-        return await operation_session(op)
-    
-
-    @staticmethod
-    async def by_id(id: int) -> Optional['OrderItem']:
-        async def op(session: AsyncSession):
-            result = await session.execute(select(OrderItem).where(OrderItem.id == id))
-            return result.scalar_one_or_none()
-        return await operation_session(op)
-
-
-    @staticmethod
-    async def delete(id: int) -> Optional[bool]:
-        async def op(session: AsyncSession):
-            result = await OrderItem.by_id(id)
-            return await delete(session, result)
-        return await operation_session(op)
-
-
 class OrderStatus(Base):
     __tablename__ = 'OrderStatus'
     id = Column(Integer, primary_key=True, autoincrement=True)
     status_name = Column(String(255), nullable=False, unique=True)
-    user_order = relationship('UserOrder', cascade=relationship_config)
-
+    order = relationship('Order', cascade=relationship_config)
 
     @staticmethod
     async def create(status_name: str) -> Optional['OrderStatus']:
         async def op(session: AsyncSession):
-            return await create(session, OrderItem(status_name=status_name))
+            return await create(session, OrderStatus(status_name=status_name))
         return await operation_session(op)
 
     @staticmethod
@@ -252,39 +213,64 @@ class OrderStatus(Base):
         return await operation_session(op)
     
 
-class UserOrder(Base):
-    __tablename__ = 'UserOrder'
+class Order(Base):
+    __tablename__ = 'Order'
     id = Column(Integer, primary_key=True, autoincrement=True)
+    item_id = Column(ForeignKey(Item.id), nullable=False)
     user_id = Column(ForeignKey(User.id), nullable=False)
-    order_id = Column(ForeignKey(OrderItem.id), nullable=False)
-    date_order = Column(DateTime, nullable=False, default=datetime.now)
-    order_status = Column(ForeignKey(OrderStatus.id), nullable=False, default=1)
+    quantity = Column(Integer, nullable=False, default=1)
+    unique_key = Column(String(255), nullable=False)
+    data_order = Column(DateTime, default=datetime.now)
+    order_status = Column(ForeignKey(OrderStatus.id), default=1, nullable=False)
 
     @staticmethod
-    async def create(data: dict) -> Optional['UserOrder']:
+    async def create(data: dict) -> Optional['Order']:
         async def op(session: AsyncSession):
-            return await create(session, OrderItem(**data))
+            return await create(session, Order(**data))
         return await operation_session(op)
-    
+
+
     @staticmethod
-    async def all() -> List['UserOrder']:
+    async def all() -> List['Order']:
         async def op(session: AsyncSession):
-            result = await session.execute(select(UserOrder))
+            result = await session.execute(select(Order))
             return result.scalars().all()
         return await operation_session(op)
     
+
     @staticmethod
-    async def by_id(id: int) -> Optional['UserOrder']:
+    async def by_id(id: int) -> Optional['Order']:
         async def op(session: AsyncSession):
-            result = await session.execute(select(UserOrder).where(UserOrder.id == id))
-            return result.scalars().all()
+            result = await session.execute(select(Order).where(Order.id == id))
+            return result.scalar_one_or_none()
         return await operation_session(op)
-    
+
+
     @staticmethod
     async def delete(id: int) -> Optional[bool]:
         async def op(session: AsyncSession):
-            result = await UserOrder.by_id(id)
+            result = await Order.by_id(id)
             return await delete(session, result)
         return await operation_session(op)
+
+
+    @staticmethod
+    async def unique_key_by_user(user_id: int) -> List[str]:
+        async def op(session: AsyncSession):
+            orders = await session.execute(select(Order).where(Order.user_id == user_id))
+            unique_key = list()
+            for ord in orders.scalars().all():
+                if ord.unique_key not in unique_key:
+                    unique_key.append(ord.unique_key)
+            return unique_key
+        return await operation_session(op)
+
+    @staticmethod
+    async def by_unique_key(unique_key: str) -> List['Order']:
+        async def op(session: AsyncSession):
+            order = await session.execute(select(Order).where(Order.unique_key == unique_key))
+            return order.scalars().all()
+        return await operation_session(op)
+
 
     
