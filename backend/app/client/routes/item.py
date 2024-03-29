@@ -1,11 +1,10 @@
 from fastapi import Depends, APIRouter
 from fastapi.responses import FileResponse
 from depends import get_item_service
-from schemas.item import ItemScheme
 from service.item import ItemService
 from util import image_path
 
-item_route = APIRouter(prefix='/api/item', tags=['Item'])
+item_route = APIRouter(prefix='/item', tags=['Item'])
 
 @item_route.get('/')
 async def all(service: ItemService = Depends(get_item_service)):

@@ -1,9 +1,8 @@
 from fastapi import Depends, APIRouter
 from depends import get_item_service
-from schemas.item import CategoryScheme
-from service.item import ItemService
+from service.item import ItemService, CategoryScheme
 
-cat_route = APIRouter(prefix='/api/category', tags=['category'])
+cat_route = APIRouter(prefix='/category', tags=['category'])
 
 
 @cat_route.post('/', status_code=201)

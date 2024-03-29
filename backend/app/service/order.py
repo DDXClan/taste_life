@@ -1,10 +1,11 @@
 import time, random
 from fastapi import HTTPException
 from typing import List
-from database.models import OrderStatus, Order, Item
+from database.models import OrderStatus, Order, Item, User
 from schemas.order import OrderItem
 
 class OrderService:
+
 
     @staticmethod
     async def create_order(user_id: int, data: OrderItem):
@@ -17,13 +18,16 @@ class OrderService:
             items.append({'item_id': item_id, 'quantity': data.order[item_id]})
         return {'unique_key': unique_key, 'order_list': [{'item': await Item.by_id(item['item_id']), 'quantity': item['quantity']} for item in items]}
 
+
     async def item_list_by_unique_key(self, unique_key: str) -> List[Item]:
         items = [await Item.by_id(_.item_id) for _ in await Order.by_unique_key(unique_key)]
         return items
 
+
     async def get_item_price(self, item_id: int) -> int:
         item = await Item.by_id(item_id)
         return item.price
+
 
     async def by_user(self, user_id: int):
         order = await Order.unique_key_by_user(user_id)
@@ -34,3 +38,18 @@ class OrderService:
                 'price': sum([order.quantity * await self.get_item_price(order.item_id) for order in await Order.by_unique_key(ord)])
             } for ord in order
         ]
+    
+    
+    
+    async def all(self):
+        result = await Order.all()
+        return [
+            {
+                'unique_key': ord,
+                'user': {key: getattr(await User.by_id(order.user_id), key) for key in ['id', 'username', 'email'] for order in await Order.by_unique_key(ord)},
+                'items': [{f'item': await Item.by_id(item.item_id), 'quantity': item.quantity} for item in await Order.by_unique_key(ord)],
+                'final_price': sum([order.quantity * await self.get_item_price(order.item_id) for order in await Order.by_unique_key(ord)])
+            } for ord in result
+        ]
+
+

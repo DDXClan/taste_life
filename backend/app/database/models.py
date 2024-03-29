@@ -54,8 +54,7 @@ class Category(Base):
                                   values(category_name=category_name).
                                   where(Category.id == id))
             await session.commit()
-            result = await Category.by_id(id)
-            return result
+            return await Category.by_id(id)
         return await operation_session(op)
 
 
@@ -105,8 +104,7 @@ class Item(Base):
         async def op(session: AsyncSession):
             await session.execute(update(Item).values(**data).where(Item.id == id))
             await session.commit()
-            result = await Item.by_id(id)
-            return result
+            return await Item.by_id(id)
         return await operation_session(op)
     
 
@@ -180,6 +178,22 @@ class User(Base):
             result = await session.execute(select(User).where(User.username == username))
             return result.scalar_one_or_none()
         return await operation_session(op)
+    
+    
+    @staticmethod 
+    async def update(id: int, data: dict) -> Optional['User']:
+        async def op(session: AsyncSession):
+            await session.execute(update(User).values(**data).where(User.id == id))
+            await session.commit()
+            return await User.by_id(id) 
+        return await operation_session(op)
+    
+    @staticmethod
+    async def delete(id: int) -> Optional[bool]:
+        async def op(session: AsyncSession):
+            result = await User.by_id(id)
+            return await delete(session, result)
+        return await operation_session(op)
 # ПОТОМ ДОПИШУ ФУНКЦИОНАЛ ПОД ЮЗЕРА СЕЙЧАС ПОКА ВАЖНЕЕ ДРУГОЕ 
     
 class OrderStatus(Base):
@@ -233,9 +247,10 @@ class Order(Base):
     @staticmethod
     async def all() -> List['Order']:
         async def op(session: AsyncSession):
-            result = await session.execute(select(Order))
+            result = await session.execute(select(Order.unique_key).distinct())
             return result.scalars().all()
         return await operation_session(op)
+
     
 
     @staticmethod
@@ -255,14 +270,10 @@ class Order(Base):
 
 
     @staticmethod
-    async def unique_key_by_user(user_id: int) -> List[str]:
+    async def unique_key_by_user(user_id: int):
         async def op(session: AsyncSession):
-            orders = await session.execute(select(Order).where(Order.user_id == user_id))
-            unique_key = list()
-            for ord in orders.scalars().all():
-                if ord.unique_key not in unique_key:
-                    unique_key.append(ord.unique_key)
-            return unique_key
+            orders = await session.execute(select(Order.unique_key).where(Order.user_id == user_id).distinct())
+            return orders.scalars().all()
         return await operation_session(op)
 
     @staticmethod

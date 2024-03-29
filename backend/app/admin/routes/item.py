@@ -1,9 +1,8 @@
 from fastapi import Depends, APIRouter, File, UploadFile, HTTPException
 from depends import get_item_service
-from schemas.item import ItemScheme
-from service.item import ItemService
+from service.item import ItemService, ItemScheme
 from util import add_img
-item_route = APIRouter(prefix='/api/item', tags=['Item'])
+item_route = APIRouter(prefix='/item', tags=['Item'])
 
 
 @item_route.post('/')

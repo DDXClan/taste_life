@@ -53,7 +53,7 @@ class AuthService:
     async def login(self, username: str, password: str):
         user = await User.by_username(username)
         if not user or not await self.verify_password(user.password, password):
-            raise HTTPException(status_code=403)
+            raise HTTPException(status_code=400)
         return await self.gen_tokens(user.username)
         
 

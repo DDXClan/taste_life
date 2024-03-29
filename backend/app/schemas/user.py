@@ -11,3 +11,4 @@ class UserScheme(BaseModel):
         if len(password) <= 6:
                 raise ValueError('Must contain more than 6 characters')
         return password
+

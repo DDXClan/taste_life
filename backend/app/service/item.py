@@ -43,7 +43,7 @@ class ItemService:
         if result:
             await redis.delete('category')
             return {'message': 'Success'}
-        raise HTTPException(status_code=400)
+        raise HTTPException(status_code=409)
     
 
 #----------------------------------------ITEM------------------------------------------------------#
@@ -92,7 +92,7 @@ class ItemService:
         if item:
             await redis.delete('item')
             return {'message': 'Success'}
-        raise HTTPException(status_code=400)
+        raise HTTPException(status_code=409)
     
 
 
