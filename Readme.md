@@ -3,12 +3,11 @@
 $ENV:database_url = 'login:password@host:port/db_name' ваши данные
 
 cd backend
-
+<pre>
 |‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾|<br />
 |         pip install -r req.txt Это один раз           |<br />
 |_______________________________________________________|
-
-
+</pre>
 Это в терминалах по очереди в каждом одну из 3 команд 
 
 uvicorn app.auth:app —reload
