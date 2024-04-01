@@ -1,4 +1,5 @@
 from fastapi import HTTPException
+from typing import Optional
 from passlib.hash import pbkdf2_sha256
 from datetime import timedelta, datetime
 import jwt
@@ -68,7 +69,7 @@ class AuthService:
         return await self.gen_tokens(decode_data['sub'])
     
 
-    async def get_current_user(self, token: str) -> User | None:
+    async def get_current_user(self, token: str) -> Optional[User]:
         decode_data = await self.decode_token(token)
         if not decode_data:
             raise HTTPException(status_code=401)
@@ -78,7 +79,7 @@ class AuthService:
         return user
     
 
-    async def get_current_admin(self, token: str) -> User | None:
+    async def get_current_admin(self, token: str) -> Optional[User]:
         user = await self.get_current_user(token)
         if Role.by_id(user.role_id) == 'admin':
             return user

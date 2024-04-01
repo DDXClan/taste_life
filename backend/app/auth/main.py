@@ -1,11 +1,18 @@
-from fastapi import FastAPI, Depends, Form
+from fastapi import FastAPI, Depends, Form, Request
 from starlette.middleware.cors import CORSMiddleware
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 from database.models import User, Role
 from schemas.user import UserScheme
 from service.auth import AuthService
 from depends import get_auth_service, get_current_user
+from util import limiter
+
 
 app = FastAPI(prefix='/auth')
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
 async def gen_role():
@@ -30,13 +37,16 @@ app.add_middleware(
 async def reg(user_data: UserScheme, service: AuthService = Depends(get_auth_service)):
     return await service.reg(user_data)
 
+
 @app.post('/login')
-async def login(username: str = Form(...), password: str = Form(...),
+@limiter.limit('5/minute')
+async def login(request: Request, username: str = Form(...), password: str = Form(...),
                 service: AuthService = Depends(get_auth_service)):
     return await service.login(username, password)
 
 @app.post('/refresh')
-async def refresh(token: str = Form(...), service: AuthService = Depends(get_auth_service)):
+@limiter.limit('1/minute')
+async def refresh(request: Request, token: str = Form(...), service: AuthService = Depends(get_auth_service)):
     return await service.refresh(token)
 
 @app.delete('/exit')

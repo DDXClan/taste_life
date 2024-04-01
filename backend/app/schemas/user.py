@@ -12,3 +12,7 @@ class UserScheme(BaseModel):
                 raise ValueError('Must contain more than 6 characters')
         return password
 
+class UserUpdateForAdmin(BaseModel):
+    username: Optional[str] = None
+    email: Optional[str] = None
+    role_id: Optional[int] = None

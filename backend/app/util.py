@@ -1,6 +1,10 @@
 import os
 from fastapi import UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+
+limiter = Limiter(key_func=get_remote_address)
 
 image_path = './img'
 

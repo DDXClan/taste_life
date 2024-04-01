@@ -4,4 +4,7 @@ from typing import Optional, Dict
 class OrderItem(BaseModel):
     order: Dict[int, int]
 
-    
+
+class OrderUpdateStatus(BaseModel):
+    unique_key: str
+    order_status: int

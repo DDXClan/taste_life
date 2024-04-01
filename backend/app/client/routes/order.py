@@ -3,7 +3,7 @@ from database.models import User, OrderStatus
 from service.order import OrderService, OrderItem
 from depends import get_current_user, get_order_service
 
-order_route = APIRouter(prefix='/ortder', tags=['Order'])
+order_route = APIRouter(prefix='/orders', tags=['Order'])
 
 async def gen_status():
     try:

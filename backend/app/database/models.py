@@ -48,7 +48,7 @@ class Category(Base):
         return await operation_session(op)
 
     @staticmethod
-    async def update(id: int, category_name: str) -> Optional['Category'] | None:
+    async def update(id: int, category_name: str) -> Optional['Category']:
         async def op(session: AsyncSession):
             await session.execute(update(Category).
                                   values(category_name=category_name).
@@ -165,6 +165,13 @@ class User(Base):
     
 
     @staticmethod
+    async def all() -> List['User']:
+        async def op(session: AsyncSession):
+            result = await session.execute(select(User))
+            return result.scalars().all()
+        return await operation_session(op)
+
+    @staticmethod
     async def by_id(id: int) -> Optional['User']:
         async def op(session: AsyncSession):
             result = await session.execute(select(User).where(User.id == id))
@@ -226,6 +233,13 @@ class OrderStatus(Base):
             return result
         return await operation_session(op)
     
+    @staticmethod
+    async def by_id(id: int) -> Optional['OrderStatus']:
+        async def op(session: AsyncSession):
+            result = await session.execute(select(OrderStatus).where(OrderStatus.id == id))
+            return result.scalar_one_or_none()
+        return await operation_session(op)
+    
 
 class Order(Base):
     __tablename__ = 'Order'
@@ -283,5 +297,12 @@ class Order(Base):
             return order.scalars().all()
         return await operation_session(op)
 
+    @staticmethod
+    async def update_status_by_unique_key(unique_key: str, order_status: int):
+        async def op(session: AsyncSession):
+            await session.execute(update(Order).values(order_status=order_status).where(Order.unique_key == unique_key))
+            await session.commit()
+            return True
+        return await operation_session(op)
 
-    
+

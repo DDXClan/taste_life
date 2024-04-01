@@ -28,3 +28,12 @@ class UserService:
         if not result:
             raise HTTPException(status_code=409)
         return {'message': 'Success'}        
+    
+    @staticmethod
+    async def all():
+        result = await User.all()
+        if not result:
+            raise HTTPException(status_code=404)
+        return [{'user_id': user.id, 
+                 'username': user.username, 
+                 'email': user.email} for user in result]
