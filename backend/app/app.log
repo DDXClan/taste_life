@@ -1,0 +1,6 @@
+{"message": "", "client_ip": ["127.0.0.1", 58446], "method": "GET", "url": "http://127.0.0.1:8001/docs", "taskName": "Task-8"}
+{"message": "", "status_code": 200, "taskName": "Task-8"}
+{"message": "", "client_ip": ["127.0.0.1", 58446], "method": "GET", "url": "http://127.0.0.1:8001/openapi.json", "taskName": "Task-9"}
+{"message": "", "status_code": 200, "taskName": "Task-9"}
+{"message": "", "client_ip": ["127.0.0.1", 58453], "method": "POST", "url": "http://127.0.0.1:8001/items/", "taskName": "Task-10"}
+{"message": "", "status_code": 401, "taskName": "Task-10"}
