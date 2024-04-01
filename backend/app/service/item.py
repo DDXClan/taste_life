@@ -9,8 +9,8 @@ class ItemService:
     @staticmethod
     async def cat_create(cat_data: CategoryScheme):
         await redis.delete('category')
-        await Category.create(cat_data.category_name)
-        return {'message': 'Success'}
+        category = await Category.create(cat_data.category_name)
+        return category
     
 
     @staticmethod
@@ -50,8 +50,8 @@ class ItemService:
     @staticmethod
     async def item_create(item_data: ItemScheme):
         await redis.delete('item')
-        await Item.create(item_data.dict())
-        return {'message': 'Success'}
+        item = await Item.create(item_data.dict())
+        return item
     
 
     @staticmethod
