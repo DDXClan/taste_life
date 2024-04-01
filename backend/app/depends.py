@@ -15,7 +15,7 @@ async def get_item_service() -> ItemService:
 
 auth_service = AuthService()
 
-oauth2scheme = OAuth2PasswordBearer('http://127.0.01:8000/login')
+oauth2scheme = OAuth2PasswordBearer('http://localhost:8080/api/auth/login')
 
 async def get_auth_service() -> AuthService:
     return auth_service
