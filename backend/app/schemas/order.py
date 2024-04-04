@@ -8,3 +8,7 @@ class OrderItem(BaseModel):
 class OrderUpdateStatus(BaseModel):
     unique_key: str
     order_status: int
+
+class BasketItem(BaseModel):
+    item_id: int
+    quantity: int = 1

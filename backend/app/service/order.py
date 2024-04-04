@@ -2,8 +2,9 @@ import time, random
 from fastapi import HTTPException
 from typing import List
 from database.models import OrderStatus, Order, Item, User
+from database.connection import redis
 from schemas.order import OrderItem, OrderUpdateStatus
-
+import json
 class OrderService:
 
 
@@ -68,3 +69,37 @@ class OrderService:
         return {'message': 'Success'}
     
 
+    @staticmethod
+    async def add_busket(user_id: int, item_id: int, quantity: int):
+        item = await Item.by_id(item_id)
+        result = await redis.get(f'{user_id}_basket')
+        items_dict = [{'id': item.id,
+                      'item_name': item.item_name,
+                      'item_price': item.price,
+                      'item_img': item.item_img,
+                      'quantity': quantity}]
+        if result is not None:
+            result = json.loads(result)
+            for x in result:
+                items_dict.append(x)
+        await redis.set(f'{user_id}_basket', json.dumps(items_dict))
+        return {'message': 'Success'}
+
+    @staticmethod
+    async def get_basket(user_id: int):
+        result = await redis.get(f'{user_id}_basket')
+        if result is None:
+            raise HTTPException(status_code=404)
+        return [x for x in json.loads(result)]
+    
+    
+    async def order_by_basket(self, user_id: int):
+        result = await redis.get(f'{user_id}_basket')
+        if result is None:
+            raise HTTPException(status_code=400)
+        order_list = dict()
+        for item in json.loads(result):
+            order_list[item['id']] =item['quantity']
+        order = await self.create_order(user_id, OrderItem(order=order_list))
+        await redis.delete(f'{user_id}_basket')
+        return order
